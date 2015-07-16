@@ -1,13 +1,15 @@
 import os
 import redis
 import uuid
+import json
 from flask import Flask
 app = Flask(__name__)
 my_uuid = str(uuid.uuid1())
 BLUE = "#AA99FF"
 GREEN = "#33CC33"
-counter = 0
-POOL = redis.ConnectionPool(host='pub-redis-17697.us-east-1-2.3.ec2.garantiadata.com', port=17697, db=0)
+rediscloud_service = json.loads(os.environ['VCAP_SERVICES'])['rediscloud'][0]
+credentials = rediscloud_service['credentials']
+POOL = redis.ConnectionPool(host=credentials['hostname'], port=credentials['port'], password=credentials['password'])
 
 COLOR = BLUE
 
@@ -22,10 +24,9 @@ def setVariable(variable_name, variable_value):
 
 @app.route('/')
 def hello():
-	global counter
-	counterVar = getVariable(counter)
+	counterVar = int(getVariable('counter'))
 	counterVar += 1 
-	setVariable(counter,counterVar)
+	setVariable('counter',counterVar)
 	return """
 	<html>
 	<body bgcolor="{}">
@@ -37,7 +38,7 @@ def hello():
 
 	</body>
 	</html>
-	""".format(COLOR,my_uuid,counter)
+	""".format(COLOR,my_uuid,counterVar)
 
 
 if __name__ == "__main__":
