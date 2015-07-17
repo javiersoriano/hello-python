@@ -22,11 +22,14 @@ def setVariable(variable_name, variable_value):
     my_server = redis.Redis(connection_pool=POOL)
     my_server.set(variable_name, variable_value)
 
+def incrVariable(variable_name):
+    my_server = redis.Redis(connection_pool=POOL)
+    my_server.incr(variable_name)
+
 @app.route('/')
 def hello():
-	counterVar = int(getVariable('counter'))
-	counterVar += 1 
-	setVariable('counter',counterVar)
+	incrVariable('counter')
+        counterVar = getVariable('counter')
 	return """
 	<html>
 	<body bgcolor="{}">
